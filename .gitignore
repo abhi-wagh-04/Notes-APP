@@ -3,6 +3,7 @@ node_modules/
 build/
 
 # Java
+application.properties
 target/
 *.class
 
