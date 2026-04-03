@@ -2,22 +2,32 @@ package com.example.notes.servicesImpl;
 
 import com.example.notes.dto.UserDTO;
 import com.example.notes.models.AppRole;
+import com.example.notes.models.PasswordResetToken;
 import com.example.notes.models.Role;
 import com.example.notes.models.User;
 
+import com.example.notes.repositories.PasswordResetTokenRepository;
 import com.example.notes.repositories.RoleRepository;
 import com.example.notes.repositories.UserRepository;
 import com.example.notes.services.UserService;
+import com.example.notes.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    @Value("${frontend.url}")
+    String frontendUrl;
 
     @Autowired
     UserRepository userRepository;
@@ -27,6 +37,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    EmailService emailService;
 
     @Override
     public void updateUserRole(Long userId, String roleName) {
@@ -108,6 +124,20 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public void generatePasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with following email"));
+        String token = UUID.randomUUID().toString();
+        Instant expiryDate = Instant.now().plus(1, ChronoUnit.HOURS);
+        PasswordResetToken resetToken = new PasswordResetToken(token, expiryDate, user);
+        passwordResetTokenRepository.save(resetToken);
+
+        String resetUrl = frontendUrl + "/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
+
+    }
+
     private UserDTO convertToDto(User user) {
         return new UserDTO(
                 user.getUserId(),
@@ -127,7 +157,5 @@ public class UserServiceImpl implements UserService {
                 user.getUpdatedDate()
         );
     }
-
-
 }
 
