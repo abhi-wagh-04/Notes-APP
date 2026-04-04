@@ -3,6 +3,7 @@ package com.example.notes.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
@@ -11,7 +12,7 @@ import java.time.Instant;
 @Data
 @Setter
 @Getter
-
+@NoArgsConstructor
 public class PasswordResetToken {
 
     @Id
@@ -24,7 +25,7 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private Instant expiryDate;
 
-    private Boolean used;
+    private boolean used;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

@@ -29,5 +29,7 @@ public interface UserService {
     void updateCredientialsExpiryStatus(Long userId, Boolean expire);
 
     void generatePasswordResetToken(String email);
+
+    void resetPassword(String token, String newPassword);
 }
 
