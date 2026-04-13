@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+
+  backend:
+
+    build: ./notes-spring
+
+    container_name: notes_backend
+
+    ports:
+      - "8080:8080"
+
+    restart: always
+
+  frontend:
+
+    build: ./notes-react
+
+    container_name: notes_frontend
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+    restart: always
